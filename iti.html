@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Roteiro Interativo</title>
+
+<!-- biblioteca p/ exportar imagem -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+body {
+  font-family: "Palatino Linotype", serif;
+  margin: 0;
+  background: #f4f4f4;
+}
+
+/* HEADER */
+h1 {
+  text-align: center;
+  background: #f28c52;
+  padding: 20px;
+  margin: 0;
+}
+
+/* LAYOUT */
+.container {
+  display: flex;
+}
+
+/* GAVETA */
+.gaveta {
+  width: 25%;
+  background: #fff;
+  padding: 15px;
+  border-right: 2px solid #ddd;
+}
+
+.bloco {
+  padding: 10px;
+  margin: 10px 0;
+  cursor: grab;
+  border-radius: 8px;
+  color: white;
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.bloco:hover {
+  transform: scale(1.05);
+}
+
+/* BOTAO REMOVER */
+.remover {
+  position: absolute;
+  top: 2px;
+  right: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* TIPOS */
+.comida { background: #e74c3c; }
+.passeio { background: #3498db; }
+.descanso { background: #2ecc71; }
+
+/* GRADE */
+.grade {
+  width: 75%;
+  padding: 20px;
+}
+
+.dia {
+  background: #fff;
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.slot {
+  border: 2px dashed #ccc;
+  padding: 10px;
+  margin: 8px 0;
+  min-height: 40px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.slot:hover {
+  background: #f9f9f9;
+}
+
+/* BOTAO EXPORTAR */
+.exportar {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #000;
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>✈️ Meu Roteiro</h1>
+
+<div class="container">
+
+  <!-- GAVETA -->
+  <div class="gaveta">
+    <h2>📦 Lugares</h2>
+
+    <input type="text" id="nome" placeholder="Nome">
+    <select id="tipo">
+      <option value="passeio">Passeio</option>
+      <option value="comida">Comida</option>
+      <option value="descanso">Descanso</option>
+    </select>
+
+    <button onclick="addBloco()">Adicionar</button>
+
+    <div id="lista"></div>
+  </div>
+
+  <!-- GRADE -->
+  <div class="grade" id="grade"></div>
+
+</div>
+
+<div class="exportar" onclick="exportar()">📸 Exportar</div>
+
+<script>
+const dias = ["Sábado","Domingo","Segunda","Terça","Quarta"];
+const horarios = ["08h-10h","10h-12h","12h-16h","16h-18h","Noite"];
+
+const grade = document.getElementById("grade");
+
+// CRIAR GRADE
+dias.forEach(dia => {
+  const d = document.createElement("div");
+  d.className = "dia";
+
+  const h = document.createElement("h3");
+  h.innerText = dia;
+  d.appendChild(h);
+
+  horarios.forEach(horario => {
+    const slot = document.createElement("div");
+    slot.className = "slot";
+    slot.dataset.key = dia+"_"+horario;
+    slot.innerText = horario;
+
+    slot.ondragover = e => e.preventDefault();
+
+    slot.ondrop = e => {
+      e.preventDefault();
+      const id = e.dataTransfer.getData("text");
+      const el = document.getElementById(id);
+      slot.appendChild(el);
+      salvar();
+    };
+
+    d.appendChild(slot);
+  });
+
+  grade.appendChild(d);
+});
+
+// CRIAR BLOCO
+function criarBloco(nome, tipo, id){
+  const b = document.createElement("div");
+  b.className = "bloco "+tipo;
+  b.innerText = nome;
+  b.id = id;
+  b.draggable = true;
+
+  b.ondragstart = e => {
+    e.dataTransfer.setData("text", id);
+  };
+
+  const x = document.createElement("span");
+  x.innerText = "x";
+  x.className = "remover";
+  x.onclick = () => {
+    b.remove();
+    salvar();
+  };
+
+  b.appendChild(x);
+  return b;
+}
+
+// ADICIONAR
+function addBloco(){
+  const nome = document.getElementById("nome").value;
+  const tipo = document.getElementById("tipo").value;
+
+  if(!nome) return;
+
+  const id = "id_"+Date.now();
+  const bloco = criarBloco(nome, tipo, id);
+
+  document.getElementById("lista").appendChild(bloco);
+
+  salvar();
+}
+
+// SALVAR
+function salvar(){
+  const dados = [];
+
+  document.querySelectorAll(".bloco").forEach(b => {
+    const parent = b.parentElement.dataset?.key || "gaveta";
+
+    dados.push({
+      id: b.id,
+      nome: b.childNodes[0].nodeValue,
+      tipo: b.classList[1],
+      local: parent
+    });
+  });
+
+  localStorage.setItem("roteiro", JSON.stringify(dados));
+}
+
+// CARREGAR
+function carregar(){
+  const dados = JSON.parse(localStorage.getItem("roteiro")) || [];
+
+  dados.forEach(d => {
+    const bloco = criarBloco(d.nome, d.tipo, d.id);
+
+    if(d.local === "gaveta"){
+      document.getElementById("lista").appendChild(bloco);
+    } else {
+      const slot = document.querySelector(`[data-key="${d.local}"]`);
+      if(slot) slot.appendChild(bloco);
+    }
+  });
+}
+
+carregar();
+
+// EXPORTAR
+function exportar(){
+  html2canvas(document.body).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "roteiro.png";
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+}
+</script>
+
+</body>
+</html>
