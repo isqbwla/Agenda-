@@ -26,7 +26,6 @@ body {
   color: var(--text);
 }
 
-/* layout */
 .container {
   display: flex;
   gap: 30px;
@@ -36,7 +35,7 @@ body {
   align-items: flex-start;
 }
 
-/* gaveta */
+/* GAVETA */
 .gaveta {
   width: 280px;
   padding: 20px;
@@ -47,7 +46,7 @@ body {
   top: 20px;
 }
 
-/* input */
+/* INPUT */
 input {
   width: 100%;
   padding: 12px;
@@ -90,7 +89,7 @@ input:focus {
   box-shadow: 0 0 10px white;
 }
 
-/* botão */
+/* BOTAO */
 button {
   width: 100%;
   padding: 12px;
@@ -101,7 +100,7 @@ button {
   cursor: pointer;
 }
 
-/* bloco */
+/* BLOCO */
 .bloco {
   padding: 10px;
   border-radius: 12px;
@@ -112,7 +111,7 @@ button {
   color: #000;
 }
 
-/* remover */
+/* REMOVER */
 .remover {
   position: absolute;
   top: 4px;
@@ -121,7 +120,7 @@ button {
   cursor: pointer;
 }
 
-/* grade */
+/* GRADE */
 .grade {
   flex: 1;
   display: flex;
@@ -129,7 +128,7 @@ button {
   gap: 20px;
 }
 
-/* dia */
+/* DIA */
 .dia {
   padding: 20px;
   border-radius: 20px;
@@ -137,16 +136,17 @@ button {
   border: 1px solid var(--border);
 }
 
-/* slot */
+/* SLOT */
 .slot {
   margin-top: 10px;
   padding: 12px;
   border-radius: 12px;
   border: 1px dashed rgba(255,255,255,0.2);
   min-height: 60px;
+  font-size: 13px;
 }
 
-/* export */
+/* EXPORT */
 .exportar {
   position: fixed;
   bottom: 20px;
@@ -166,7 +166,6 @@ button {
   <div class="gaveta">
     <input type="text" id="nome" placeholder="nome">
 
-    <!-- PALETA -->
     <div class="paleta" id="paleta"></div>
 
     <button id="addBtn">adicionar</button>
@@ -190,7 +189,6 @@ const cores = [
 
 let corSelecionada = cores[0];
 
-// render paleta
 const paleta = document.getElementById("paleta");
 
 cores.forEach(c => {
@@ -207,12 +205,12 @@ cores.forEach(c => {
   paleta.appendChild(el);
 });
 
-// selecionar primeira
 paleta.firstChild.classList.add("selected");
 
-// grade
+// HORÁRIOS CORRIGIDOS
 const dias = ["sábado","domingo","segunda","terça","quarta"];
-const horarios = ["08h","10h","12h","16h","noite"];
+const horarios = ["08–10","10–12","12–16","16–18","noite"];
+
 const grade = document.getElementById("grade");
 
 dias.forEach(dia => {
@@ -242,7 +240,6 @@ dias.forEach(dia => {
   grade.appendChild(d);
 });
 
-// bloco
 function criarBloco(nome, cor, id){
   const b = document.createElement("div");
   b.className = "bloco";
@@ -257,6 +254,7 @@ function criarBloco(nome, cor, id){
   const x = document.createElement("span");
   x.textContent = "x";
   x.className = "remover";
+
   x.onclick = () => {
     b.remove();
     salvar();
@@ -266,7 +264,6 @@ function criarBloco(nome, cor, id){
   return b;
 }
 
-// add
 document.getElementById("addBtn").onclick = () => {
   const nome = document.getElementById("nome").value;
   if(!nome) return;
@@ -278,7 +275,6 @@ document.getElementById("addBtn").onclick = () => {
   salvar();
 };
 
-// salvar
 function salvar(){
   const dados = [];
   document.querySelectorAll(".bloco").forEach(b => {
@@ -292,7 +288,6 @@ function salvar(){
   localStorage.setItem("planner", JSON.stringify(dados));
 }
 
-// carregar
 function carregar(){
   const dados = JSON.parse(localStorage.getItem("planner")) || [];
 
@@ -310,7 +305,6 @@ function carregar(){
 
 carregar();
 
-// PDF
 document.getElementById("pdfBtn").onclick = async () => {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
