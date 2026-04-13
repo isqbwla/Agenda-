@@ -5,17 +5,17 @@
 <title>Planner</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
+* { box-sizing: border-box; }
+
 :root {
   --bg: #0b0b12;
   --card: rgba(255,255,255,0.04);
   --border: rgba(255,255,255,0.1);
-
-  --neon-pink: #ff4ecd;
-  --neon-blue: #4ecbff;
   --text: #eaeaf0;
 }
 
@@ -26,16 +26,7 @@ body {
   color: var(--text);
 }
 
-/* HEADER */
-header {
-  text-align: center;
-  padding: 30px;
-  font-size: 18px;
-  letter-spacing: 1px;
-  color: var(--neon-pink);
-}
-
-/* LAYOUT */
+/* layout */
 .container {
   display: flex;
   gap: 30px;
@@ -45,98 +36,92 @@ header {
   align-items: flex-start;
 }
 
-/* GAVETA */
+/* gaveta */
 .gaveta {
-  width: 260px;
+  width: 280px;
   padding: 20px;
   border-radius: 20px;
-
   background: var(--card);
-  backdrop-filter: blur(10px);
-
   border: 1px solid var(--border);
-
   position: sticky;
   top: 20px;
-
-  box-shadow: 0 0 20px rgba(255,78,205,0.15);
 }
 
-/* INPUTS */
-input, select {
+/* input */
+input {
   width: 100%;
   padding: 12px;
-  margin-top: 10px;
+  margin-bottom: 10px;
   border-radius: 12px;
-
   background: rgba(255,255,255,0.05);
   border: 1px solid transparent;
-
   color: var(--text);
+}
+
+input:focus {
+  border: 1px solid #ff4ecd;
+  box-shadow: 0 0 10px #ff4ecd;
   outline: none;
 }
 
-/* FIX BUG INPUT */
-input:focus, select:focus {
-  border: 1px solid var(--neon-pink);
-  box-shadow: 0 0 10px var(--neon-pink);
+/* PALETA */
+.paleta {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin: 10px 0;
 }
 
-/* BOTAO */
+.cor {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 2px solid transparent;
+}
+
+.cor:hover {
+  transform: scale(1.15);
+}
+
+.cor.selected {
+  border: 2px solid white;
+  box-shadow: 0 0 10px white;
+}
+
+/* botão */
 button {
   width: 100%;
   padding: 12px;
-  margin-top: 12px;
   border-radius: 14px;
-
   background: linear-gradient(135deg, #ff4ecd, #4ecbff);
   border: none;
   color: white;
-
   cursor: pointer;
-  transition: 0.2s;
 }
 
-button:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 20px rgba(255,78,205,0.6);
-}
-
-/* BLOCOS */
+/* bloco */
 .bloco {
   padding: 10px;
   border-radius: 12px;
   margin-top: 10px;
   font-size: 13px;
-
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-
   cursor: grab;
   position: relative;
-
-  transition: 0.2s;
+  color: #000;
 }
 
-.bloco:hover {
-  box-shadow: 0 0 10px var(--neon-blue);
-}
-
-.bloco:active {
-  cursor: grabbing;
-}
-
-/* REMOVER */
+/* remover */
 .remover {
   position: absolute;
   top: 4px;
   right: 8px;
   font-size: 12px;
-  opacity: 0.6;
   cursor: pointer;
 }
 
-/* GRADE */
+/* grade */
 .grade {
   flex: 1;
   display: flex;
@@ -144,79 +129,45 @@ button:hover {
   gap: 20px;
 }
 
-/* DIA */
+/* dia */
 .dia {
-  padding: 18px;
+  padding: 20px;
   border-radius: 20px;
-
   background: var(--card);
-  backdrop-filter: blur(10px);
-
   border: 1px solid var(--border);
-
-  box-shadow: 0 0 15px rgba(78,203,255,0.1);
 }
 
-/* SLOT */
+/* slot */
 .slot {
   margin-top: 10px;
   padding: 12px;
   border-radius: 12px;
-
-  border: 1px dashed rgba(255,255,255,0.15);
+  border: 1px dashed rgba(255,255,255,0.2);
   min-height: 60px;
-
-  transition: 0.2s;
 }
 
-.slot.dragover {
-  border-color: var(--neon-blue);
-  box-shadow: 0 0 10px var(--neon-blue);
-}
-
-/* EXPORTAR */
+/* export */
 .exportar {
   position: fixed;
   bottom: 20px;
   right: 20px;
-
-  padding: 12px 16px;
-  border-radius: 14px;
-
-  background: rgba(255,255,255,0.08);
-  border: 1px solid var(--border);
-
+  padding: 12px;
+  background: #222;
+  border-radius: 12px;
   cursor: pointer;
-}
-
-/* MOBILE */
-@media(max-width: 900px){
-  .container {
-    flex-direction: column;
-  }
-
-  .gaveta {
-    position: relative;
-    width: 100%;
-  }
 }
 </style>
 </head>
 
 <body>
 
-<header>planner</header>
-
 <div class="container">
 
   <div class="gaveta">
     <input type="text" id="nome" placeholder="nome">
-    
-    <select id="tipo">
-      <option value="passeio">passeio</option>
-      <option value="comida">comida</option>
-      <option value="descanso">descanso</option>
-    </select>
+
+    <!-- PALETA -->
+    <div class="paleta" id="paleta"></div>
 
     <button id="addBtn">adicionar</button>
 
@@ -227,42 +178,61 @@ button:hover {
 
 </div>
 
-<div class="exportar" id="exportBtn">exportar</div>
+<div class="exportar" id="pdfBtn">exportar pdf</div>
 
 <script>
+const cores = [
+"#cdb4db","#ffc8dd","#ffafcc","#bde0fe","#a2d2ff",
+"#ffadad","#ffd6a5","#fdffb6","#caffbf","#9bf6ff",
+"#a0c4ff","#bdb2ff","#ffc6ff","#fffffc","#d0f4de",
+"#f1c0e8","#cfbaf0","#a3c4f3","#90dbf4","#8eecf5"
+];
+
+let corSelecionada = cores[0];
+
+// render paleta
+const paleta = document.getElementById("paleta");
+
+cores.forEach(c => {
+  const el = document.createElement("div");
+  el.className = "cor";
+  el.style.background = c;
+
+  el.onclick = () => {
+    document.querySelectorAll(".cor").forEach(e => e.classList.remove("selected"));
+    el.classList.add("selected");
+    corSelecionada = c;
+  };
+
+  paleta.appendChild(el);
+});
+
+// selecionar primeira
+paleta.firstChild.classList.add("selected");
+
+// grade
 const dias = ["sábado","domingo","segunda","terça","quarta"];
 const horarios = ["08h","10h","12h","16h","noite"];
-
 const grade = document.getElementById("grade");
 
 dias.forEach(dia => {
   const d = document.createElement("div");
   d.className = "dia";
 
-  const h = document.createElement("div");
-  h.textContent = dia;
-  h.style.color = "#ff4ecd";
-  d.appendChild(h);
+  d.innerHTML = "<strong>"+dia+"</strong>";
 
-  horarios.forEach(horario => {
+  horarios.forEach(h => {
     const slot = document.createElement("div");
     slot.className = "slot";
-    slot.dataset.key = dia+"_"+horario;
-    slot.textContent = horario;
+    slot.dataset.key = dia+"_"+h;
+    slot.textContent = h;
 
     slot.ondragover = e => e.preventDefault();
 
-    slot.ondragenter = () => slot.classList.add("dragover");
-    slot.ondragleave = () => slot.classList.remove("dragover");
-
     slot.ondrop = e => {
       e.preventDefault();
-      slot.classList.remove("dragover");
-
       const id = e.dataTransfer.getData("text");
-      const el = document.getElementById(id);
-      slot.appendChild(el);
-
+      slot.appendChild(document.getElementById(id));
       salvar();
     };
 
@@ -272,67 +242,62 @@ dias.forEach(dia => {
   grade.appendChild(d);
 });
 
-function criarBloco(nome, tipo, id){
+// bloco
+function criarBloco(nome, cor, id){
   const b = document.createElement("div");
   b.className = "bloco";
   b.textContent = nome;
+  b.style.background = cor;
+  b.dataset.cor = cor;
   b.id = id;
   b.draggable = true;
 
-  b.ondragstart = e => {
-    e.dataTransfer.setData("text", id);
-  };
+  b.ondragstart = e => e.dataTransfer.setData("text", id);
 
   const x = document.createElement("span");
   x.textContent = "x";
   x.className = "remover";
-
   x.onclick = () => {
-    if(confirm("remover?")){
-      b.remove();
-      salvar();
-    }
+    b.remove();
+    salvar();
   };
 
   b.appendChild(x);
   return b;
 }
 
-document.getElementById("addBtn").addEventListener("click", () => {
+// add
+document.getElementById("addBtn").onclick = () => {
   const nome = document.getElementById("nome").value;
-
   if(!nome) return;
 
-  const id = "id_"+Date.now();
-  const bloco = criarBloco(nome, "", id);
-
+  const bloco = criarBloco(nome, corSelecionada, "id_"+Date.now());
   document.getElementById("lista").appendChild(bloco);
   document.getElementById("nome").value = "";
 
   salvar();
-});
+};
 
+// salvar
 function salvar(){
   const dados = [];
-
   document.querySelectorAll(".bloco").forEach(b => {
-    const parent = b.parentElement.dataset?.key || "gaveta";
-
     dados.push({
       id: b.id,
       nome: b.childNodes[0].nodeValue,
-      local: parent
+      cor: b.dataset.cor,
+      local: b.parentElement.dataset?.key || "gaveta"
     });
   });
-
   localStorage.setItem("planner", JSON.stringify(dados));
 }
 
+// carregar
 function carregar(){
   const dados = JSON.parse(localStorage.getItem("planner")) || [];
 
   dados.forEach(d => {
-    const bloco = criarBloco(d.nome, "", d.id);
+    const bloco = criarBloco(d.nome, d.cor, d.id);
 
     if(d.local === "gaveta"){
       document.getElementById("lista").appendChild(bloco);
@@ -345,14 +310,24 @@ function carregar(){
 
 carregar();
 
-document.getElementById("exportBtn").addEventListener("click", () => {
-  html2canvas(document.getElementById("grade")).then(canvas => {
-    const link = document.createElement("a");
-    link.download = "planner.png";
-    link.href = canvas.toDataURL();
-    link.click();
-  });
-});
+// PDF
+document.getElementById("pdfBtn").onclick = async () => {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+
+  const diasEl = document.querySelectorAll(".dia");
+
+  for(let i = 0; i < diasEl.length; i++){
+    const canvas = await html2canvas(diasEl[i]);
+    const img = canvas.toDataURL("image/png");
+
+    if(i > 0) pdf.addPage();
+
+    pdf.addImage(img, 'PNG', 10, 10, 180, 0);
+  }
+
+  pdf.save("planner.pdf");
+};
 </script>
 
 </body>
