@@ -6,34 +6,33 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --bg: #f7f7fb;
-  --card: #ffffff;
-  --soft: #f0f1f6;
-  --border: #e6e6ef;
-  --text: #2d2d2d;
+  --bg: #0b0b12;
+  --card: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.1);
 
-  --passeio: #a8d8ff;
-  --comida: #ffc9c9;
-  --descanso: #c8f7dc;
+  --neon-pink: #ff4ecd;
+  --neon-blue: #4ecbff;
+  --text: #eaeaf0;
 }
 
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
-  background: var(--bg);
+  background: radial-gradient(circle at top, #111122, #050507);
   color: var(--text);
 }
 
 /* HEADER */
 header {
   text-align: center;
-  padding: 30px 20px 10px;
-  font-weight: 500;
-  font-size: 20px;
+  padding: 30px;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: var(--neon-pink);
 }
 
 /* LAYOUT */
@@ -42,69 +41,90 @@ header {
   gap: 30px;
   max-width: 1200px;
   margin: auto;
-  padding: 20px 30px 50px;
+  padding: 20px;
   align-items: flex-start;
 }
 
 /* GAVETA */
 .gaveta {
   width: 260px;
+  padding: 20px;
+  border-radius: 20px;
+
   background: var(--card);
-  border-radius: 16px;
-  padding: 18px;
+  backdrop-filter: blur(10px);
+
   border: 1px solid var(--border);
 
   position: sticky;
   top: 20px;
 
-  max-height: calc(100vh - 40px);
-  overflow-y: auto;
+  box-shadow: 0 0 20px rgba(255,78,205,0.15);
 }
 
 /* INPUTS */
-input, select, button {
+input, select {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin-top: 10px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--soft);
-  font-family: inherit;
+  border-radius: 12px;
+
+  background: rgba(255,255,255,0.05);
+  border: 1px solid transparent;
+
+  color: var(--text);
+  outline: none;
 }
 
+/* FIX BUG INPUT */
+input:focus, select:focus {
+  border: 1px solid var(--neon-pink);
+  box-shadow: 0 0 10px var(--neon-pink);
+}
+
+/* BOTAO */
 button {
-  background: #2d2d2d;
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 14px;
+
+  background: linear-gradient(135deg, #ff4ecd, #4ecbff);
+  border: none;
   color: white;
+
   cursor: pointer;
+  transition: 0.2s;
 }
 
-/* LISTA */
-#lista {
-  margin-top: 10px;
+button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 20px rgba(255,78,205,0.6);
 }
 
 /* BLOCOS */
 .bloco {
-  padding: 10px 12px;
+  padding: 10px;
   border-radius: 12px;
   margin-top: 10px;
   font-size: 13px;
+
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+
   cursor: grab;
   position: relative;
+
   transition: 0.2s;
 }
 
 .bloco:hover {
-  transform: scale(1.02);
+  box-shadow: 0 0 10px var(--neon-blue);
 }
 
 .bloco:active {
   cursor: grabbing;
 }
-
-.passeio { background: var(--passeio); }
-.comida { background: var(--comida); }
-.descanso { background: var(--descanso); }
 
 /* REMOVER */
 .remover {
@@ -112,8 +132,8 @@ button {
   top: 4px;
   right: 8px;
   font-size: 12px;
-  cursor: pointer;
   opacity: 0.6;
+  cursor: pointer;
 }
 
 /* GRADE */
@@ -126,27 +146,32 @@ button {
 
 /* DIA */
 .dia {
-  background: var(--card);
-  border-radius: 16px;
   padding: 18px;
+  border-radius: 20px;
+
+  background: var(--card);
+  backdrop-filter: blur(10px);
+
   border: 1px solid var(--border);
+
+  box-shadow: 0 0 15px rgba(78,203,255,0.1);
 }
 
 /* SLOT */
 .slot {
-  background: var(--soft);
-  border: 1px dashed var(--border);
-  padding: 12px;
   margin-top: 10px;
-  border-radius: 10px;
+  padding: 12px;
+  border-radius: 12px;
+
+  border: 1px dashed rgba(255,255,255,0.15);
   min-height: 60px;
+
   transition: 0.2s;
-  font-size: 13px;
 }
 
 .slot.dragover {
-  background: #eef3ff;
-  border-color: #9bbcff;
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 10px var(--neon-blue);
 }
 
 /* EXPORTAR */
@@ -154,15 +179,17 @@ button {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background: #2d2d2d;
-  color: white;
+
   padding: 12px 16px;
-  border-radius: 12px;
+  border-radius: 14px;
+
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--border);
+
   cursor: pointer;
-  font-size: 13px;
 }
 
-/* RESPONSIVO */
+/* MOBILE */
 @media(max-width: 900px){
   .container {
     flex-direction: column;
@@ -170,7 +197,6 @@ button {
 
   .gaveta {
     position: relative;
-    max-height: none;
     width: 100%;
   }
 }
@@ -179,13 +205,13 @@ button {
 
 <body>
 
-<header>planner semanal</header>
+<header>planner</header>
 
 <div class="container">
 
   <div class="gaveta">
     <input type="text" id="nome" placeholder="nome">
-
+    
     <select id="tipo">
       <option value="passeio">passeio</option>
       <option value="comida">comida</option>
@@ -209,14 +235,13 @@ const horarios = ["08h","10h","12h","16h","noite"];
 
 const grade = document.getElementById("grade");
 
-// CRIAR GRADE
 dias.forEach(dia => {
   const d = document.createElement("div");
   d.className = "dia";
 
   const h = document.createElement("div");
   h.textContent = dia;
-  h.style.fontWeight = "500";
+  h.style.color = "#ff4ecd";
   d.appendChild(h);
 
   horarios.forEach(horario => {
@@ -247,10 +272,9 @@ dias.forEach(dia => {
   grade.appendChild(d);
 });
 
-// BLOCO
 function criarBloco(nome, tipo, id){
   const b = document.createElement("div");
-  b.className = "bloco "+tipo;
+  b.className = "bloco";
   b.textContent = nome;
   b.id = id;
   b.draggable = true;
@@ -259,17 +283,10 @@ function criarBloco(nome, tipo, id){
     e.dataTransfer.setData("text", id);
   };
 
-  b.ondblclick = () => {
-    const novo = prompt("editar:", b.textContent);
-    if(novo){
-      b.childNodes[0].nodeValue = novo;
-      salvar();
-    }
-  };
-
   const x = document.createElement("span");
   x.textContent = "x";
   x.className = "remover";
+
   x.onclick = () => {
     if(confirm("remover?")){
       b.remove();
@@ -281,15 +298,13 @@ function criarBloco(nome, tipo, id){
   return b;
 }
 
-// ADD
 document.getElementById("addBtn").addEventListener("click", () => {
   const nome = document.getElementById("nome").value;
-  const tipo = document.getElementById("tipo").value;
 
   if(!nome) return;
 
   const id = "id_"+Date.now();
-  const bloco = criarBloco(nome, tipo, id);
+  const bloco = criarBloco(nome, "", id);
 
   document.getElementById("lista").appendChild(bloco);
   document.getElementById("nome").value = "";
@@ -297,7 +312,6 @@ document.getElementById("addBtn").addEventListener("click", () => {
   salvar();
 });
 
-// SALVAR
 function salvar(){
   const dados = [];
 
@@ -307,7 +321,6 @@ function salvar(){
     dados.push({
       id: b.id,
       nome: b.childNodes[0].nodeValue,
-      tipo: b.classList[1],
       local: parent
     });
   });
@@ -315,12 +328,11 @@ function salvar(){
   localStorage.setItem("planner", JSON.stringify(dados));
 }
 
-// CARREGAR
 function carregar(){
   const dados = JSON.parse(localStorage.getItem("planner")) || [];
 
   dados.forEach(d => {
-    const bloco = criarBloco(d.nome, d.tipo, d.id);
+    const bloco = criarBloco(d.nome, "", d.id);
 
     if(d.local === "gaveta"){
       document.getElementById("lista").appendChild(bloco);
@@ -333,7 +345,6 @@ function carregar(){
 
 carregar();
 
-// EXPORTAR
 document.getElementById("exportBtn").addEventListener("click", () => {
   html2canvas(document.getElementById("grade")).then(canvas => {
     const link = document.createElement("a");
