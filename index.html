@@ -2,58 +2,98 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Roteiro Interativo</title>
+<title>Meu Roteiro</title>
 
-<!-- biblioteca p/ exportar imagem -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
+:root {
+  --primary: #e67e22;
+  --bg: #f8f9fb;
+  --card: #ffffff;
+  --border: #e0e0e0;
+}
+
 body {
-  font-family: "Palatino Linotype", serif;
+  font-family: 'Inter', sans-serif;
   margin: 0;
-  background: #f4f4f4;
+  background: var(--bg);
 }
 
 /* HEADER */
 h1 {
   text-align: center;
-  background: #f28c52;
+  background: var(--primary);
   padding: 20px;
   margin: 0;
+  color: white;
 }
 
 /* LAYOUT */
 .container {
   display: flex;
+  gap: 16px;
+  padding: 16px;
 }
 
 /* GAVETA */
 .gaveta {
   width: 25%;
-  background: #fff;
+  background: var(--card);
   padding: 15px;
-  border-right: 2px solid #ddd;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
+/* INPUTS */
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-family: inherit;
+}
+
+button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* BLOCOS */
 .bloco {
   padding: 10px;
   margin: 10px 0;
   cursor: grab;
-  border-radius: 8px;
+  border-radius: 10px;
   color: white;
   position: relative;
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .bloco:hover {
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
-/* BOTAO REMOVER */
+.bloco:active {
+  cursor: grabbing;
+}
+
+/* REMOVER */
 .remover {
   position: absolute;
   top: 2px;
-  right: 5px;
+  right: 6px;
   cursor: pointer;
   font-weight: bold;
 }
@@ -66,27 +106,28 @@ h1 {
 /* GRADE */
 .grade {
   width: 75%;
-  padding: 20px;
 }
 
 .dia {
-  background: #fff;
-  margin-bottom: 20px;
+  background: var(--card);
+  margin-bottom: 16px;
   padding: 15px;
-  border-radius: 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .slot {
   border: 2px dashed #ccc;
   padding: 10px;
   margin: 8px 0;
-  min-height: 40px;
-  border-radius: 6px;
-  transition: background 0.2s;
+  min-height: 50px;
+  border-radius: 8px;
+  transition: 0.2s;
 }
 
-.slot:hover {
-  background: #f9f9f9;
+.slot.dragover {
+  background: #e3f2fd;
+  border-color: #3498db;
 }
 
 /* BOTAO EXPORTAR */
@@ -94,11 +135,23 @@ h1 {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background: #000;
+  background: linear-gradient(135deg, #000, #333);
   color: white;
-  padding: 12px;
-  border-radius: 10px;
+  padding: 14px;
+  border-radius: 12px;
   cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* RESPONSIVO */
+@media(max-width: 900px){
+  .container {
+    flex-direction: column;
+  }
+
+  .gaveta, .grade {
+    width: 100%;
+  }
 }
 </style>
 </head>
@@ -113,14 +166,15 @@ h1 {
   <div class="gaveta">
     <h2>📦 Lugares</h2>
 
-    <input type="text" id="nome" placeholder="Nome">
+    <input type="text" id="nome" placeholder="Nome do lugar">
+    
     <select id="tipo">
       <option value="passeio">Passeio</option>
       <option value="comida">Comida</option>
       <option value="descanso">Descanso</option>
     </select>
 
-    <button onclick="addBloco()">Adicionar</button>
+    <button id="addBtn">Adicionar</button>
 
     <div id="lista"></div>
   </div>
@@ -130,7 +184,7 @@ h1 {
 
 </div>
 
-<div class="exportar" onclick="exportar()">📸 Exportar</div>
+<div class="exportar" id="exportBtn">📸 Exportar</div>
 
 <script>
 const dias = ["Sábado","Domingo","Segunda","Terça","Quarta"];
@@ -155,11 +209,17 @@ dias.forEach(dia => {
 
     slot.ondragover = e => e.preventDefault();
 
+    slot.ondragenter = () => slot.classList.add("dragover");
+    slot.ondragleave = () => slot.classList.remove("dragover");
+
     slot.ondrop = e => {
       e.preventDefault();
+      slot.classList.remove("dragover");
+
       const id = e.dataTransfer.getData("text");
       const el = document.getElementById(id);
       slot.appendChild(el);
+
       salvar();
     };
 
@@ -181,12 +241,24 @@ function criarBloco(nome, tipo, id){
     e.dataTransfer.setData("text", id);
   };
 
+  // EDITAR
+  b.ondblclick = () => {
+    const novo = prompt("Editar nome:", b.firstChild.textContent);
+    if(novo){
+      b.firstChild.textContent = novo;
+      salvar();
+    }
+  };
+
+  // REMOVER
   const x = document.createElement("span");
-  x.innerText = "x";
+  x.innerText = "×";
   x.className = "remover";
   x.onclick = () => {
-    b.remove();
-    salvar();
+    if(confirm("Remover este item?")){
+      b.remove();
+      salvar();
+    }
   };
 
   b.appendChild(x);
@@ -194,7 +266,7 @@ function criarBloco(nome, tipo, id){
 }
 
 // ADICIONAR
-function addBloco(){
+document.getElementById("addBtn").addEventListener("click", () => {
   const nome = document.getElementById("nome").value;
   const tipo = document.getElementById("tipo").value;
 
@@ -205,8 +277,10 @@ function addBloco(){
 
   document.getElementById("lista").appendChild(bloco);
 
+  document.getElementById("nome").value = "";
+
   salvar();
-}
+});
 
 // SALVAR
 function salvar(){
@@ -217,7 +291,7 @@ function salvar(){
 
     dados.push({
       id: b.id,
-      nome: b.childNodes[0].nodeValue,
+      nome: b.firstChild.textContent,
       tipo: b.classList[1],
       local: parent
     });
@@ -244,15 +318,15 @@ function carregar(){
 
 carregar();
 
-// EXPORTAR
-function exportar(){
-  html2canvas(document.body).then(canvas => {
+// EXPORTAR (só grade)
+document.getElementById("exportBtn").addEventListener("click", () => {
+  html2canvas(document.getElementById("grade")).then(canvas => {
     const link = document.createElement("a");
     link.download = "roteiro.png";
     link.href = canvas.toDataURL();
     link.click();
   });
-}
+});
 </script>
 
 </body>
